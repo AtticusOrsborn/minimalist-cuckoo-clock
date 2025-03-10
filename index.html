@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimalist Clock</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@300&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Space Mono', monospace;
+            overflow: hidden;
+        }
+
+        #clock {
+            color: #ffffff;
+            font-size: 15vw;
+            font-weight: 300;
+            letter-spacing: -2px;
+            position: relative;
+        }
+
+        .cuckoo {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: none;
+            filter: blur(0.5px);
+        }
+
+        @keyframes cuckoo1 {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            40% { transform: translate(-50%, -50%) scale(0.8); }
+            60% { transform: translate(-50%, -50%) scale(1.1); }
+            80% { transform: translate(-50%, -50%) scale(0.9); }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        }
+
+        @keyframes cuckoo2 {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.2) rotate(10deg); opacity: 1; }
+            40% { transform: translate(-50%, -50%) scale(0.8) rotate(-5deg); }
+            60% { transform: translate(-50%, -50%) scale(1.1) rotate(5deg); }
+            80% { transform: translate(-50%, -50%) scale(0.9) rotate(-2deg); }
+            100% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+        }
+
+        @keyframes cuckoo3 {
+            0% { transform: translate(-50%, -50%) scale(0) translateY(0); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.2) translateY(-20px); opacity: 1; }
+            40% { transform: translate(-50%, -50%) scale(0.8) translateY(-10px); }
+            60% { transform: translate(-50%, -50%) scale(1.1) translateY(-15px); }
+            80% { transform: translate(-50%, -50%) scale(0.9) translateY(-5px); }
+            100% { transform: translate(-50%, -50%) scale(0) translateY(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="clock"></div>
+    <div class="cuckoo"></div>
+
+    <script>
+        // Configuration object for easy adjustments
+        const config = {
+            soundCount: 100,
+            pitchRange: { min: 0.85, max: 1.15 },
+            durationRange: { min: 1600, max: 2400 },
+            pauseRange: { min: 700, max: 1300 },
+            animations: ['cuckoo1', 'cuckoo2', 'cuckoo3'],
+            colors: [
+                '#ffffff', '#f0f0f0', '#e0e0e0', '#d0d0d0',
+                '#ffebee', '#f3e5f5', '#e3f2fd', '#e8f5e9'
+            ]
+        };
+
+        // Create cuckoo sounds with varying pitches
+        const cuckooSounds = Array.from({ length: config.soundCount }, () => {
+            const audio = new Audio('https://www.soundjay.com/clock/sounds/cuckoo-clock-1.mp3');
+            audio.playbackRate = config.pitchRange.min + 
+                (Math.random() * (config.pitchRange.max - config.pitchRange.min));
+            return audio;
+        });
+
+        // Preload all sounds
+        cuckooSounds.forEach(sound => sound.load());
+
+        // Utility functions
+        const getRandom = (min, max) => min + Math.random() * (max - min);
+        const getRandomInt = (min, max) => Math.floor(getRandom(min, max));
+        const getRandomElement = (array) => array[getRandomInt(0, array.length)];
+
+        // Get a random cuckoo sound
+        const getRandomCuckoo = () => getRandomElement(cuckooSounds);
+
+        // Update clock display
+        const updateClock = () => {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+
+            if (minutes === '00' && seconds === '00') {
+                showCuckoo(parseInt(hours));
+            }
+        };
+
+        // Show cuckoo animation with sound
+        const showCuckoo = async (hours) => {
+            const cuckoo = document.querySelector('.cuckoo');
+            
+            for (let i = 0; i < hours; i++) {
+                // Set random color and animation
+                cuckoo.style.backgroundColor = getRandomElement(config.colors);
+                cuckoo.style.animation = `${getRandomElement(config.animations)} ${getRandom(config.durationRange.min, config.durationRange.max)}ms ease-in-out`;
+                cuckoo.style.display = 'block';
+                
+                // Play sound
+                getRandomCuckoo().play();
+                
+                // Wait for animation
+                await new Promise(resolve => setTimeout(resolve, config.durationRange.max));
+                
+                cuckoo.style.display = 'none';
+                
+                // Random pause between cuckoos
+                if (i < hours - 1) {
+                    await new Promise(resolve => setTimeout(resolve, getRandom(config.pauseRange.min, config.pauseRange.max)));
+                }
+            }
+        };
+
+        // Initialize clock
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html> 
