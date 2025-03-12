@@ -13,7 +13,9 @@ A minimalist cuckoo clock with a cyberpunk Matrix theme. Built with vanilla HTML
 
 ## Live Demo
 
-[View the live demo](https://your-vercel-url-here.vercel.app)
+[View the live demo](https://matrix-cuckoo.vercel.app/)
+
+> **Note**: Due to browser security policies, you may need to interact with the page (click anywhere) before the cuckoo sound will play.
 
 ## Local Development
 
