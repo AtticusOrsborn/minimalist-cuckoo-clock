@@ -1,9 +1,11 @@
 {
     "version": 2,
     "builds": [
-        { "src": "*.html", "use": "@vercel/static" }
+        { "src": "*.html", "use": "@vercel/static" },
+        { "src": "*.mp3", "use": "@vercel/static" }
     ],
     "routes": [
+        { "src": "/CuckooSingle.mp3", "headers": { "Content-Type": "audio/mpeg" } },
         { "src": "/(.*)", "dest": "/index.html" }
     ]
 } 

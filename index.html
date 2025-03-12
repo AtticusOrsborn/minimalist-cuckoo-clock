@@ -234,16 +234,37 @@
         };
 
         // Initialize audio after user interaction
-        const initializeAudio = () => {
+        const initializeAudio = async () => {
             if (!config.sound) {
-                config.sound = new Audio('CuckooSingle.mp3');
-                config.sound.preload = 'auto';
-                document.removeEventListener('click', initializeAudio);
-                const status = document.getElementById('sound-status');
-                status.textContent = 'Sound Enabled';
-                status.classList.remove('disabled');
-                status.classList.add('enabled');
-                console.log('Audio initialized');
+                try {
+                    // Test if the file exists
+                    const response = await fetch('CuckooSingle.mp3');
+                    if (!response.ok) {
+                        throw new Error(`Sound file not found: ${response.status}`);
+                    }
+                    
+                    config.sound = new Audio('CuckooSingle.mp3');
+                    config.sound.preload = 'auto';
+                    
+                    // Test loading the audio
+                    await new Promise((resolve, reject) => {
+                        config.sound.addEventListener('canplaythrough', resolve, { once: true });
+                        config.sound.addEventListener('error', (e) => reject(new Error(`Audio load error: ${e.target.error.message}`)), { once: true });
+                        config.sound.load();
+                    });
+
+                    document.removeEventListener('click', initializeAudio);
+                    const status = document.getElementById('sound-status');
+                    status.textContent = 'Sound Enabled';
+                    status.classList.remove('disabled');
+                    status.classList.add('enabled');
+                    console.log('Audio initialized successfully');
+                } catch (error) {
+                    console.error('Failed to initialize audio:', error);
+                    const status = document.getElementById('sound-status');
+                    status.textContent = `Sound Error: ${error.message}`;
+                    status.style.color = '#ff0000';
+                }
             }
         };
 
@@ -297,8 +318,8 @@
         // Initialize
         updateClock();
         setInterval(updateClock, 1000);
-        config.elements.forceButton.addEventListener('click', () => {
-            initializeAudio(); // Ensure audio is initialized on button click
+        config.elements.forceButton.addEventListener('click', async () => {
+            await initializeAudio(); // Ensure audio is initialized on button click
             showCuckoo(1);
         });
     </script>
