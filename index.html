@@ -176,8 +176,9 @@
                 forceButton: document.getElementById('force-cuckoo')
             },
             sound: (() => {
-                const audio = new Audio('cuckoo.mp3');
+                const audio = new Audio('CuckooSingle.mp3');
                 audio.preload = 'auto';
+                audio.load();
                 return audio;
             })()
         };
